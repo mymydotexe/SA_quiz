@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>quiz://web-fundamentals</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg:#eef0f3;
+  --panel:#ffffff;
+  --panel-2:#f7f8fa;
+  --ink:#1b1f24;
+  --ink-dim:#6b7280;
+  --line:#dfe2e6;
+  --orange:#e36209;   /* HTML */
+  --blue:#2f6feb;     /* Design/CSS-JS */
+  --green:#1a7f37;    /* Internet */
+  --purple:#8250df;   /* Fundamentals */
+  --red:#cf222e;      /* Credibility */
+  --term-bg:#161a1f;
+  --term-text:#8de29a;
+}
+
+*{box-sizing:border-box;}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:var(--bg);
+  font-family:'Inter', sans-serif;
+  color:var(--ink);
+  display:flex;
+  justify-content:center;
+  padding:40px 18px 70px;
+}
+
+.mono{ font-family:'JetBrains Mono', monospace; }
+
+.window{
+  width:100%;
+  max-width:660px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.04), 0 12px 32px rgba(20,24,30,0.06);
+  overflow:hidden;
+}
+
+/* ---------- Browser chrome ---------- */
+.chrome{
+  background:var(--panel-2);
+  border-bottom:1px solid var(--line);
+  padding:10px 14px 0;
+}
+.dots{ display:flex; gap:7px; padding:2px 2px 10px; }
+.dot{ width:10px; height:10px; border-radius:50%; }
+.dot.r{ background:#ff5f57; }
+.dot.y{ background:#febc2e; }
+.dot.g{ background:#28c840; }
+.tabs{ display:flex; gap:2px; }
+.tab{
+  font-family:'JetBrains Mono', monospace;
+  font-size:11.5px;
+  color:var(--ink-dim);
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-bottom:none;
+  border-radius:8px 8px 0 0;
+  padding:7px 14px;
+}
+.tab.active{ color:var(--ink); font-weight:600; }
+.addr-row{
+  display:flex; align-items:center; gap:8px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:7px;
+  margin:0 0 10px;
+  padding:8px 12px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:12.5px;
+  color:var(--ink-dim);
+}
+.addr-row .lock{ color:var(--green); }
+.addr-row .url-static{ color:var(--ink-dim); }
+.addr-row .url-live{ color:var(--ink); font-weight:600; }
+
+/* ---------- progress ---------- */
+.progress-track{
+  height:5px; background:var(--line); position:relative; border-radius:0;
+}
+.progress-fill{
+  height:100%; background:linear-gradient(90deg, var(--blue), var(--purple));
+  width:0%; transition:width .35s ease;
+}
+
+/* ---------- body content ---------- */
+.content{ padding:26px 26px 22px; min-height:430px; display:flex; flex-direction:column; }
+
+/* Start screen */
+.start{ margin:auto; text-align:center; }
+.start .badge{
+  display:inline-block; font-family:'JetBrains Mono', monospace; font-size:11px;
+  color:var(--ink-dim); border:1px solid var(--line); border-radius:20px;
+  padding:5px 14px; margin-bottom:18px; letter-spacing:.04em;
+}
+.start h2{ margin:0 0 10px; font-size:23px; }
+.start p{ color:var(--ink-dim); font-size:14px; line-height:1.6; max-width:420px; margin:0 auto 26px; }
+
+button.primary{
+  background:var(--ink); color:#fff; border:none; border-radius:8px;
+  font-family:'JetBrains Mono', monospace; font-weight:600; font-size:13px;
+  padding:12px 28px; cursor:pointer; transition:transform .15s ease, background .15s ease;
+}
+button.primary:hover{ background:#000; transform:translateY(-1px); }
+
+/* Question */
+.q-meta{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.q-count{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--ink-dim); }
+.q-tag{
+  font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:700;
+  padding:4px 10px; border-radius:6px; text-transform:uppercase; letter-spacing:.03em;
+  color:#fff;
+}
+.q-tag.Fundamentals{ background:var(--purple); }
+.q-tag.Internet{ background:var(--green); }
+.q-tag.HTML{ background:var(--orange); }
+.q-tag.Design{ background:var(--blue); }
+.q-tag.Credibility{ background:var(--red); }
+
+.q-text{ font-size:19px; font-weight:600; line-height:1.4; margin:2px 0 20px; }
+
+.options{ display:flex; flex-direction:column; gap:9px; margin-bottom:14px; }
+.opt{
+  text-align:left; background:var(--panel-2); border:1.5px solid var(--line); border-radius:9px;
+  padding:12px 15px; font-size:14px; color:var(--ink); cursor:pointer;
+  transition:border-color .15s ease, background .15s ease;
+  display:flex; align-items:center; gap:10px;
+}
+.opt .chev{ font-family:'JetBrains Mono', monospace; color:var(--ink-dim); font-size:12px; }
+.opt:hover:not(:disabled){ border-color:var(--blue); background:#f2f6ff; }
+.opt:disabled{ cursor:default; }
+.opt.correct{ border-color:var(--green); background:#eaf7ee; }
+.opt.wrong{ border-color:var(--red); background:#fdecec; }
+.opt.dim{ opacity:.4; }
+
+/* Hint / console */
+.hint-zone{ margin-top:auto; padding-top:14px; }
+.hint-btn{
+  font-family:'JetBrains Mono', monospace; font-size:11.5px; font-weight:600;
+  background:var(--panel-2); border:1px solid var(--line); border-radius:7px;
+  color:var(--ink-dim); padding:8px 13px; cursor:pointer;
+  transition:border-color .15s ease, color .15s ease;
+}
+.hint-btn:hover:not(:disabled){ border-color:var(--purple); color:var(--purple); }
+.hint-btn:disabled{ opacity:.4; cursor:default; }
+
+.console{
+  margin-top:10px; background:var(--term-bg); border-radius:8px;
+  font-family:'JetBrains Mono', monospace; font-size:12.5px;
+  max-height:0; opacity:0; overflow:hidden;
+  transition:max-height .35s ease, opacity .3s ease, padding .35s ease;
+  padding:0 14px;
+}
+.console.open{ max-height:80px; opacity:1; padding:10px 14px; }
+.console .prompt{ color:#6a9955; margin-right:6px; }
+.console .line{ color:var(--term-text); }
+
+/* Result */
+.result{ margin:auto; text-align:center; }
+.result .pct{ font-family:'JetBrains Mono', monospace; font-weight:700; font-size:52px; }
+.result h3{ font-size:18px; margin:12px 0 8px; }
+.result p{ color:var(--ink-dim); font-size:14px; max-width:380px; margin:0 auto 22px; line-height:1.6; }
+.result .stats{
+  display:flex; justify-content:center; gap:26px; margin:16px 0 26px;
+  font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--ink-dim);
+}
+.result .stats b{ display:block; color:var(--ink); font-size:19px; }
+
+.footer-note{
+  text-align:center; margin-top:14px; font-size:11.5px; color:var(--ink-dim);
+  font-family:'JetBrains Mono', monospace;
+}
+</style>
+</head>
+<body>
+
+<div class="window">
+  <div class="chrome">
+    <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+    <div class="tabs"><div class="tab active">web-fundamentals.quiz</div></div>
+    <div class="addr-row">
+      <span class="lock">&#128274;</span>
+      <span class="url-static">quiz://</span><span class="url-live" id="urlLive">web-fundamentals/start</span>
+    </div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+  <div class="content" id="content">
+    <div class="start" id="startScreen">
+      <div class="badge">50 QUESTIONS &middot; INTERNET, HTML, CSS, JS &amp; CREDIBILITY</div>
+      <h2>Run the assessment</h2>
+      <p>Every concept from the source file — how the web works, front-end vs. back-end, HTML basics, and how to judge whether a website is credible. Stuck? Open the console for a hint.</p>
+      <button class="primary" onclick="startQuiz()">$ start --quiz</button>
+    </div>
+  </div>
+  <div class="footer-note" id="footerNote" style="padding-bottom:16px;">50 questions, shuffled order &middot; hints available anytime &middot; no penalty for asking</div>
+</div>
+
+<script>
+const rawData = [
+  {q:"What is web development?", a:"The process of creating and maintaining websites.", cat:"Fundamentals", hint:"Websites don't just appear — someone builds and keeps them running."},
+  {q:"What are the four main aspects of web development?", a:"Design, structure, functionality, and maintenance.", cat:"Fundamentals", hint:"Think: how it looks, how it's built, what it does, and keeping it running."},
+  {q:"What does HTML provide?", a:"The structure of a webpage.", cat:"HTML", hint:"The skeleton beneath everything you see on a page."},
+  {q:"What does CSS control?", a:"The appearance of a webpage.", cat:"Design", hint:"Colors, fonts, spacing — the look, not the logic."},
+  {q:"What does JavaScript provide?", a:"Interactivity and behavior of a webpage.", cat:"Design", hint:"What makes a button actually do something when you click it."},
+  {q:"In the house analogy, what does HTML represent?", a:"The concrete structure of the house.", cat:"HTML", hint:"Walls and framing, not paint or wiring."},
+  {q:"In the house analogy, what does CSS represent?", a:"The paint and decoration.", cat:"Design", hint:"Think wallpaper and trim, not the structure itself."},
+  {q:"In the house analogy, what does JavaScript represent?", a:"The electricity and automatic doors.", cat:"Design", hint:"The wiring that makes things move and respond."},
+  {q:"What is the Internet?", a:"A global network connecting billions of computers.", cat:"Internet", hint:"The physical/technical network itself, not the content riding on it."},
+  {q:"What is the World Wide Web (WWW)?", a:"A collection of webpages and websites accessed through the Internet.", cat:"Internet", hint:"What you actually browse — pages linked together."},
+  {q:"Can the Web exist without the Internet?", a:"No.", cat:"Internet", hint:"One is the network, the other rides on top of it."},
+  {q:"What application is used to access websites?", a:"A web browser.", cat:"Internet", hint:"Chrome, Firefox, Safari — that kind of tool."},
+  {q:"What happens first when accessing a website?", a:"The user enters a website address (URL).", cat:"Internet", hint:"You have to type or click something before anything loads."},
+  {q:"Who sends the request to the server?", a:"The browser.", cat:"Internet", hint:"It's the same tool you use to browse — it asks, the other side answers."},
+  {q:"What does the server do?", a:"Processes the request and returns the webpage.", cat:"Internet", hint:"It receives the request, does the work, and sends something back."},
+  {q:"What is a client?", a:"The user's device that requests information.", cat:"Internet", hint:"It's the one asking for something — usually your own device."},
+  {q:"What is a server?", a:"A computer that stores and delivers website files.", cat:"Internet", hint:"It's the one holding the files and handing them out on request."},
+  {q:"In the restaurant analogy, who is the client?", a:"The customer.", cat:"Internet", hint:"Whoever places the order, not whoever cooks it."},
+  {q:"In the restaurant analogy, who is the server?", a:"The kitchen.", cat:"Internet", hint:"Where the food actually gets made and sent out."},
+  {q:"What is Front-End development?", a:"The visible part of a website users interact with.", cat:"Fundamentals", hint:"Everything you can see and click on directly."},
+  {q:"Name the three Front-End technologies.", a:"HTML, CSS, JavaScript.", cat:"Fundamentals", hint:"Structure, style, and behavior — the trio you've seen all quiz long."},
+  {q:"What is Back-End development?", a:"The server-side processes behind a website.", cat:"Fundamentals", hint:"The part running behind the scenes, out of view."},
+  {q:"Name one Back-End programming language.", a:"Python, PHP, Java, or Node.js.", cat:"Fundamentals", hint:"Not HTML/CSS/JS-in-browser — think server-side languages."},
+  {q:"Information Warfare is not only about what?", a:"Cyber attacks.", cat:"Credibility", hint:"Hacking is only one piece of a much bigger picture."},
+  {q:"Name one use of websites in Information Warfare.", a:"Public information, official announcements, strategic communication, crisis communication, public awareness, or countering misinformation.", cat:"Credibility", hint:"Websites can inform and correct the record, not just attack."},
+  {q:"Which domain is commonly used by government websites?", a:".gov", cat:"Credibility", hint:"Government agencies use this ending."},
+  {q:"Which domain is commonly used by military websites?", a:".mil", cat:"Credibility", hint:"Armed forces websites use this ending."},
+  {q:"Which domain is commonly used by educational institutions?", a:".edu", cat:"Credibility", hint:"Schools and universities use this ending."},
+  {q:"Which domain is commonly used by commercial businesses?", a:".com", cat:"Credibility", hint:"The most common ending — for-profit businesses."},
+  {q:"Which domain is commonly used by organizations?", a:".org", cat:"Credibility", hint:"Nonprofits and organizations typically use this ending."},
+  {q:"Does a domain alone guarantee a website is trustworthy?", a:"No.", cat:"Credibility", hint:"Anyone can register almost any domain type, regardless of intent."},
+  {q:"Give one characteristic of an official website.", a:"HTTPS, verified organization, contact information, updated content, or references.", cat:"Credibility", hint:"Look for a secure connection and a real organization behind it."},
+  {q:"Give one characteristic of an unofficial website.", a:"Unknown owner, anonymous author, clickbait, no references, or outdated information.", cat:"Credibility", hint:"Missing sources, unclear ownership, sensational headlines."},
+  {q:"What does HTML stand for?", a:"HyperText Markup Language.", cat:"HTML", hint:"Spell it out: HyperText ______ ______."},
+  {q:"Without HTML, what cannot exist?", a:"A webpage.", cat:"HTML", hint:"Nothing to structure means nothing to display."},
+  {q:"Which HTML tag contains everything visible on the webpage?", a:"<body>", cat:"HTML", hint:"Everything the visitor actually sees lives inside this tag."},
+  {q:"Which HTML tag sets the browser tab title?", a:"<title>", cat:"HTML", hint:"Look at the browser tab, not the page content itself."},
+  {q:"Which HTML tag is used for the main heading?", a:"<h1>", cat:"HTML", hint:"The biggest, most important heading on the page."},
+  {q:"Which HTML tag is used for paragraphs?", a:"<p>", cat:"HTML", hint:"Where a block of regular text lives."},
+  {q:"What HTML element is used to collect user input?", a:"Form", cat:"HTML", hint:"Text boxes, checkboxes, submit buttons — all bundled together."},
+  {q:"What is the purpose of CSS?", a:"To style and format webpages.", cat:"Design", hint:"Same idea as earlier — appearance, not structure or logic."},
+  {q:"What is Responsive Design?", a:"A design that adjusts automatically to different screen sizes.", cat:"Design", hint:"A layout that reshapes itself depending on your screen."},
+  {q:"Why is Responsive Design important?", a:"Most users access websites using smartphones.", cat:"Design", hint:"Think about what device most people are holding right now."},
+  {q:"What does JavaScript add to websites?", a:"Interactivity such as buttons, menus, forms, and animations.", cat:"Design", hint:"Same theme as before — things that react when you interact with them."},
+  {q:"What are the five typical website layout components?", a:"Header, Navigation, Main Content, Sidebar, Footer.", cat:"Fundamentals", hint:"Top bar, menu, main area, side panel, bottom bar — five zones."},
+  {q:"Name one item in the Website Credibility Checklist.", a:"HTTPS, domain, publication date, references, contact information, organization, grammar, images, or sources.", cat:"Credibility", hint:"Same theme as the official-website question — signs a site can be trusted."},
+  {q:"Should you always verify information before sharing it?", a:"Yes.", cat:"Credibility", hint:"Think about the responsible thing to do before hitting 'share'."},
+  {q:"Name one ethical practice when using online information.", a:"Verify information, respect copyright, protect privacy, use official sources, or cite references.", cat:"Credibility", hint:"Doing right by sources and original creators."},
+  {q:"Name one unethical practice to avoid.", a:"Spreading misinformation, modifying official announcements, sharing unverified content, or plagiarism.", cat:"Credibility", hint:"The opposite of ethical practice — things that spread falsehood or steal credit."},
+  {q:"What is the final step in the Information Verification Process?", a:"Verify the information before sharing it.", cat:"Credibility", hint:"The very last thing you should do before sharing information."}
+];
+
+let quizSet = [], idx = 0, score = 0, hintsUsed = 0, answered = false;
+
+function setUrl(text){ document.getElementById('urlLive').textContent = text; }
+function setProgress(pct){ document.getElementById('progressFill').style.width = pct + '%'; }
+
+function startQuiz(){
+  quizSet = [...rawData].sort(()=>0.5-Math.random());
+  idx = 0; score = 0; hintsUsed = 0;
+  document.getElementById('footerNote').textContent = 'Deployment in progress — answer, or open the console for a hint.';
+  renderQuestion();
+}
+
+function renderQuestion(){
+  answered = false;
+  const item = quizSet[idx];
+  setUrl('web-fundamentals/q' + (idx+1));
+  setProgress((idx/quizSet.length)*100);
+
+  let distractors = rawData.filter(d=>d.a!==item.a).sort(()=>0.5-Math.random()).slice(0,3).map(d=>d.a);
+  let options = [item.a, ...distractors].sort(()=>0.5-Math.random());
+
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div class="q-meta">
+      <span class="q-count">Q${idx+1} / ${quizSet.length}</span>
+      <span class="q-tag ${item.cat}">${item.cat}</span>
+    </div>
+    <div class="q-text">${item.q}</div>
+    <div class="options" id="options"></div>
+    <div class="hint-zone">
+      <button class="hint-btn" id="hintBtn" onclick="revealHint()">&gt; open console for hint</button>
+      <div class="console" id="consoleBox">
+        <span class="prompt">&gt;</span><span class="line" id="hintText">${item.hint}</span>
+      </div>
+    </div>
+  `;
+
+  const optWrap = document.getElementById('options');
+  options.forEach(opt=>{
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = `<span class="chev">&gt;</span><span>${opt}</span>`;
+    btn.onclick = ()=>selectAnswer(btn, opt, item.a);
+    optWrap.appendChild(btn);
+  });
+}
+
+function revealHint(){
+  document.getElementById('consoleBox').classList.add('open');
+  document.getElementById('hintBtn').disabled = true;
+  hintsUsed++;
+}
+
+function selectAnswer(btn, selected, correct){
+  if(answered) return;
+  answered = true;
+  document.getElementById('hintBtn').disabled = true;
+
+  const allOpts = document.querySelectorAll('.opt');
+  allOpts.forEach(o=>{
+    o.disabled = true;
+    const label = o.querySelector('span:last-child').textContent;
+    if(label === correct) o.classList.add('correct');
+    else if(o === btn) o.classList.add('wrong');
+    else o.classList.add('dim');
+  });
+
+  if(selected === correct) score++;
+
+  setTimeout(()=>{
+    idx++;
+    if(idx < quizSet.length) renderQuestion();
+    else showResults();
+  }, 900);
+}
+
+function showResults(){
+  setProgress(100);
+  setUrl('web-fundamentals/results');
+  const pct = Math.round((score/quizSet.length)*100);
+  let color = pct>=80 ? 'var(--green)' : pct>=50 ? 'var(--orange)' : 'var(--red)';
+  let msg = pct>=80 ? "Strong grasp of the fundamentals — internet, HTML, and credibility all clicked."
+    : pct>=50 ? "Solid baseline. Revisit a few weak spots before the real thing."
+    : "Worth another pass through the source material before retrying.";
+
+  document.getElementById('footerNote').textContent = 'Assessment complete.';
+  document.getElementById('content').innerHTML = `
+    <div class="result">
+      <div class="pct" style="color:${color};">${pct}%</div>
+      <h3>Assessment complete</h3>
+      <p>${msg}</p>
+      <div class="stats">
+        <div><b>${score}/${quizSet.length}</b>correct</div>
+        <div><b>${hintsUsed}</b>hints used</div>
+      </div>
+      <button class="primary" onclick="startQuiz()">$ retry --quiz</button>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
