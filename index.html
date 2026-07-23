@@ -3,363 +3,634 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>quiz://web-fundamentals</title>
+<title>SIGINT-7 // Sentiment Analysis in Information Warfare</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+  :root{
+    --bg: #12140f;
+    --bg-panel: #1a1d15;
+    --paper: #e8e3d3;
+    --ink: #cfd0c4;
+    --ink-dim: #7f8574;
+    --olive: #6b7a4f;
+    --olive-bright: #9db66a;
+    --amber: #c9a227;
+    --red: #a4432f;
+    --line: #33362a;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Courier New", Courier, monospace;
+    --serif: Georgia, "Times New Roman", serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(107,122,79,0.08), transparent 40%),
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--mono);
+    min-height:100vh;
+    padding:32px 16px 64px;
+    display:flex;
+    justify-content:center;
+  }
+  .sheet{
+    width:100%;
+    max-width:760px;
+  }
 
-:root{
-  --bg:#eef0f3;
-  --panel:#ffffff;
-  --panel-2:#f7f8fa;
-  --ink:#1b1f24;
-  --ink-dim:#6b7280;
-  --line:#dfe2e6;
-  --orange:#e36209;   /* HTML */
-  --blue:#2f6feb;     /* Design/CSS-JS */
-  --green:#1a7f37;    /* Internet */
-  --purple:#8250df;   /* Fundamentals */
-  --red:#cf222e;      /* Credibility */
-  --term-bg:#161a1f;
-  --term-text:#8de29a;
-}
+  /* header / classification bar */
+  .classbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:11px;
+    letter-spacing:0.14em;
+    color:var(--ink-dim);
+    border-bottom:1px solid var(--line);
+    padding-bottom:10px;
+    margin-bottom:18px;
+    text-transform:uppercase;
+  }
+  .classbar .tag{color:var(--amber);}
 
-*{box-sizing:border-box;}
+  header.title-block{
+    margin-bottom:28px;
+  }
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:0.22em;
+    color:var(--olive-bright);
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  h1{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:clamp(26px,5vw,38px);
+    line-height:1.15;
+    color:var(--paper);
+    margin:0 0 10px;
+  }
+  .subtitle{
+    color:var(--ink-dim);
+    font-size:13px;
+    line-height:1.6;
+    max-width:56ch;
+  }
 
-body{
-  margin:0;
-  min-height:100vh;
-  background:var(--bg);
-  font-family:'Inter', sans-serif;
-  color:var(--ink);
-  display:flex;
-  justify-content:center;
-  padding:40px 18px 70px;
-}
+  /* panel */
+  .panel{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:28px 26px;
+    position:relative;
+    overflow:hidden;
+  }
+  .panel::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:3px;
+    background:repeating-linear-gradient(90deg, var(--olive) 0 14px, transparent 14px 20px);
+    opacity:0.5;
+  }
 
-.mono{ font-family:'JetBrains Mono', monospace; }
+  /* progress dossier tabs */
+  .progress-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:22px;
+  }
+  .progress-track{
+    flex:1;
+    height:6px;
+    background:#22251a;
+    border:1px solid var(--line);
+    position:relative;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--olive), var(--olive-bright));
+    width:0%;
+    transition:width .35s ease;
+  }
+  .progress-label{
+    font-size:11px;
+    color:var(--ink-dim);
+    letter-spacing:0.1em;
+    white-space:nowrap;
+  }
+  .progress-label b{color:var(--amber);}
 
-.window{
-  width:100%;
-  max-width:660px;
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:12px;
-  box-shadow:0 1px 2px rgba(0,0,0,0.04), 0 12px 32px rgba(20,24,30,0.06);
-  overflow:hidden;
-}
+  .qnum{
+    font-size:12px;
+    color:var(--olive-bright);
+    letter-spacing:0.15em;
+    margin-bottom:10px;
+  }
+  .qtext{
+    font-family:var(--serif);
+    font-size:20px;
+    color:var(--paper);
+    line-height:1.4;
+    margin-bottom:22px;
+  }
 
-/* ---------- Browser chrome ---------- */
-.chrome{
-  background:var(--panel-2);
-  border-bottom:1px solid var(--line);
-  padding:10px 14px 0;
-}
-.dots{ display:flex; gap:7px; padding:2px 2px 10px; }
-.dot{ width:10px; height:10px; border-radius:50%; }
-.dot.r{ background:#ff5f57; }
-.dot.y{ background:#febc2e; }
-.dot.g{ background:#28c840; }
-.tabs{ display:flex; gap:2px; }
-.tab{
-  font-family:'JetBrains Mono', monospace;
-  font-size:11.5px;
-  color:var(--ink-dim);
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-bottom:none;
-  border-radius:8px 8px 0 0;
-  padding:7px 14px;
-}
-.tab.active{ color:var(--ink); font-weight:600; }
-.addr-row{
-  display:flex; align-items:center; gap:8px;
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:7px;
-  margin:0 0 10px;
-  padding:8px 12px;
-  font-family:'JetBrains Mono', monospace;
-  font-size:12.5px;
-  color:var(--ink-dim);
-}
-.addr-row .lock{ color:var(--green); }
-.addr-row .url-static{ color:var(--ink-dim); }
-.addr-row .url-live{ color:var(--ink); font-weight:600; }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .opt{
+    text-align:left;
+    background:#191c13;
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:13px 16px;
+    font-family:var(--mono);
+    font-size:14px;
+    border-radius:2px;
+    cursor:pointer;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    transition:border-color .15s ease, background .15s ease, transform .1s ease;
+  }
+  .opt .letter{
+    color:var(--olive-bright);
+    font-weight:700;
+    flex-shrink:0;
+  }
+  .opt:hover:not(.locked){
+    border-color:var(--olive-bright);
+    background:#1e2216;
+  }
+  .opt:active:not(.locked){transform:scale(0.995);}
 
-/* ---------- progress ---------- */
-.progress-track{
-  height:5px; background:var(--line); position:relative; border-radius:0;
-}
-.progress-fill{
-  height:100%; background:linear-gradient(90deg, var(--blue), var(--purple));
-  width:0%; transition:width .35s ease;
-}
+  .opt.correct{
+    border-color:var(--olive-bright);
+    background:rgba(107,122,79,0.22);
+  }
+  .opt.correct .letter{color:var(--olive-bright);}
+  .opt.wrong{
+    border-color:var(--red);
+    background:rgba(164,67,47,0.16);
+  }
+  .opt.wrong .letter{color:var(--red);}
+  .opt.locked{cursor:default;}
+  .opt.dim{opacity:0.45;}
 
-/* ---------- body content ---------- */
-.content{ padding:26px 26px 22px; min-height:430px; display:flex; flex-direction:column; }
+  .feedback{
+    margin-top:18px;
+    padding:14px 16px;
+    border-left:3px solid var(--olive-bright);
+    background:#171a11;
+    font-size:13px;
+    line-height:1.6;
+    color:var(--ink);
+    display:none;
+  }
+  .feedback.show{display:block;}
+  .feedback .verdict{
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    font-size:12px;
+    margin-bottom:6px;
+  }
+  .feedback.right .verdict{color:var(--olive-bright);}
+  .feedback.wrong .verdict{color:var(--red);}
 
-/* Start screen */
-.start{ margin:auto; text-align:center; }
-.start .badge{
-  display:inline-block; font-family:'JetBrains Mono', monospace; font-size:11px;
-  color:var(--ink-dim); border:1px solid var(--line); border-radius:20px;
-  padding:5px 14px; margin-bottom:18px; letter-spacing:.04em;
-}
-.start h2{ margin:0 0 10px; font-size:23px; }
-.start p{ color:var(--ink-dim); font-size:14px; line-height:1.6; max-width:420px; margin:0 auto 26px; }
+  .nav-row{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:22px;
+  }
+  button.next-btn{
+    background:var(--olive);
+    color:#12140f;
+    border:none;
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:11px 22px;
+    border-radius:2px;
+    cursor:pointer;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease, background .15s ease;
+  }
+  button.next-btn.show{opacity:1;pointer-events:auto;}
+  button.next-btn:hover{background:var(--olive-bright);}
 
-button.primary{
-  background:var(--ink); color:#fff; border:none; border-radius:8px;
-  font-family:'JetBrains Mono', monospace; font-weight:600; font-size:13px;
-  padding:12px 28px; cursor:pointer; transition:transform .15s ease, background .15s ease;
-}
-button.primary:hover{ background:#000; transform:translateY(-1px); }
+  /* start screen */
+  .start-screen, .end-screen{text-align:center;padding:20px 6px;}
+  .stamp{
+    display:inline-block;
+    border:2px solid var(--red);
+    color:var(--red);
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:0.2em;
+    padding:6px 14px;
+    transform:rotate(-3deg);
+    margin-bottom:18px;
+    text-transform:uppercase;
+  }
+  .stamp.green{border-color:var(--olive-bright);color:var(--olive-bright);}
+  .start-screen p, .end-screen p{
+    color:var(--ink-dim);
+    font-size:13px;
+    line-height:1.7;
+    max-width:48ch;
+    margin:0 auto 22px;
+  }
+  .meta-list{
+    text-align:left;
+    max-width:340px;
+    margin:0 auto 26px;
+    font-size:12px;
+    color:var(--ink-dim);
+  }
+  .meta-list div{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed var(--line);}
+  .meta-list span:last-child{color:var(--paper);}
+  .start-btn, .restart-btn{
+    background:var(--amber);
+    color:#12140f;
+    border:none;
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:14px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    padding:14px 30px;
+    border-radius:2px;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  .start-btn:hover, .restart-btn:hover{background:#e0bb3d;}
 
-/* Question */
-.q-meta{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
-.q-count{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--ink-dim); }
-.q-tag{
-  font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:700;
-  padding:4px 10px; border-radius:6px; text-transform:uppercase; letter-spacing:.03em;
-  color:#fff;
-}
-.q-tag.Fundamentals{ background:var(--purple); }
-.q-tag.Internet{ background:var(--green); }
-.q-tag.HTML{ background:var(--orange); }
-.q-tag.Design{ background:var(--blue); }
-.q-tag.Credibility{ background:var(--red); }
+  .score-big{
+    font-family:var(--serif);
+    font-size:56px;
+    color:var(--paper);
+    margin:6px 0 4px;
+  }
+  .score-tag{
+    font-size:13px;
+    letter-spacing:0.12em;
+    color:var(--olive-bright);
+    text-transform:uppercase;
+    margin-bottom:26px;
+  }
 
-.q-text{ font-size:19px; font-weight:600; line-height:1.4; margin:2px 0 20px; }
+  .review{
+    text-align:left;
+    margin-top:26px;
+    border-top:1px solid var(--line);
+    padding-top:20px;
+  }
+  .review-item{
+    padding:10px 0;
+    border-bottom:1px dashed var(--line);
+    font-size:12.5px;
+    display:flex;
+    gap:10px;
+  }
+  .review-item:last-child{border-bottom:none;}
+  .review-item .mark{
+    width:18px;flex-shrink:0;font-weight:700;
+  }
+  .review-item.ok .mark{color:var(--olive-bright);}
+  .review-item.bad .mark{color:var(--red);}
+  .review-item .rtxt{color:var(--ink-dim);line-height:1.5;}
+  .review-item .rtxt b{color:var(--paper);font-weight:600;}
 
-.options{ display:flex; flex-direction:column; gap:9px; margin-bottom:14px; }
-.opt{
-  text-align:left; background:var(--panel-2); border:1.5px solid var(--line); border-radius:9px;
-  padding:12px 15px; font-size:14px; color:var(--ink); cursor:pointer;
-  transition:border-color .15s ease, background .15s ease;
-  display:flex; align-items:center; gap:10px;
-}
-.opt .chev{ font-family:'JetBrains Mono', monospace; color:var(--ink-dim); font-size:12px; }
-.opt:hover:not(:disabled){ border-color:var(--blue); background:#f2f6ff; }
-.opt:disabled{ cursor:default; }
-.opt.correct{ border-color:var(--green); background:#eaf7ee; }
-.opt.wrong{ border-color:var(--red); background:#fdecec; }
-.opt.dim{ opacity:.4; }
+  .hidden{display:none !important;}
 
-/* Hint / console */
-.hint-zone{ margin-top:auto; padding-top:14px; }
-.hint-btn{
-  font-family:'JetBrains Mono', monospace; font-size:11.5px; font-weight:600;
-  background:var(--panel-2); border:1px solid var(--line); border-radius:7px;
-  color:var(--ink-dim); padding:8px 13px; cursor:pointer;
-  transition:border-color .15s ease, color .15s ease;
-}
-.hint-btn:hover:not(:disabled){ border-color:var(--purple); color:var(--purple); }
-.hint-btn:disabled{ opacity:.4; cursor:default; }
-
-.console{
-  margin-top:10px; background:var(--term-bg); border-radius:8px;
-  font-family:'JetBrains Mono', monospace; font-size:12.5px;
-  max-height:0; opacity:0; overflow:hidden;
-  transition:max-height .35s ease, opacity .3s ease, padding .35s ease;
-  padding:0 14px;
-}
-.console.open{ max-height:80px; opacity:1; padding:10px 14px; }
-.console .prompt{ color:#6a9955; margin-right:6px; }
-.console .line{ color:var(--term-text); }
-
-/* Result */
-.result{ margin:auto; text-align:center; }
-.result .pct{ font-family:'JetBrains Mono', monospace; font-weight:700; font-size:52px; }
-.result h3{ font-size:18px; margin:12px 0 8px; }
-.result p{ color:var(--ink-dim); font-size:14px; max-width:380px; margin:0 auto 22px; line-height:1.6; }
-.result .stats{
-  display:flex; justify-content:center; gap:26px; margin:16px 0 26px;
-  font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--ink-dim);
-}
-.result .stats b{ display:block; color:var(--ink); font-size:19px; }
-
-.footer-note{
-  text-align:center; margin-top:14px; font-size:11.5px; color:var(--ink-dim);
-  font-family:'JetBrains Mono', monospace;
-}
+  @media (max-width:480px){
+    .panel{padding:20px 16px;}
+    .qtext{font-size:17px;}
+  }
 </style>
 </head>
 <body>
+<div class="sheet">
 
-<div class="window">
-  <div class="chrome">
-    <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
-    <div class="tabs"><div class="tab active">web-fundamentals.quiz</div></div>
-    <div class="addr-row">
-      <span class="lock">&#128274;</span>
-      <span class="url-static">quiz://</span><span class="url-live" id="urlLive">web-fundamentals/start</span>
-    </div>
+  <div class="classbar">
+    <span>FIELD BRIEFING &middot; SIGINT-7</span>
+    <span class="tag">FOR TRAINING USE ONLY</span>
   </div>
-  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
 
-  <div class="content" id="content">
-    <div class="start" id="startScreen">
-      <div class="badge">50 QUESTIONS &middot; INTERNET, HTML, CSS, JS &amp; CREDIBILITY</div>
-      <h2>Run the assessment</h2>
-      <p>Every concept from the source file — how the web works, front-end vs. back-end, HTML basics, and how to judge whether a website is credible. Stuck? Open the console for a hint.</p>
-      <button class="primary" onclick="startQuiz()">$ start --quiz</button>
+  <header class="title-block">
+    <div class="eyebrow">Assessment Module</div>
+    <h1>AI-Assisted Sentiment Analysis<br>in Information Warfare</h1>
+    <div class="subtitle">20-item knowledge check covering OSINT collection, NLP fundamentals, sentiment classification, and their role in the cognitive dimension of the information environment.</div>
+  </header>
+
+  <div class="panel">
+
+    <!-- START SCREEN -->
+    <div id="start-screen" class="start-screen">
+      <div class="stamp">Classified &mdash; Briefing Pending</div>
+      <p>You are about to review core concepts in AI-driven sentiment analysis as applied to open-source intelligence and information warfare. Twenty questions. Multiple choice. No time limit.</p>
+      <div class="meta-list">
+        <div><span>Questions</span><span>20</span></div>
+        <div><span>Format</span><span>Multiple choice</span></div>
+        <div><span>Domain</span><span>OSINT / NLP / IE-Cognitive</span></div>
+        <div><span>Passing mark</span><span>14 / 20</span></div>
+      </div>
+      <button class="start-btn" id="start-btn">Begin Briefing</button>
     </div>
+
+    <!-- QUIZ SCREEN -->
+    <div id="quiz-screen" class="hidden">
+      <div class="progress-row">
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="progress-label">Q <b id="q-current">1</b>/20</div>
+      </div>
+      <div class="qnum" id="q-topic">ITEM 01</div>
+      <div class="qtext" id="q-text">Question text</div>
+      <div class="options" id="q-options"></div>
+      <div class="feedback" id="q-feedback">
+        <div class="verdict" id="fb-verdict">Correct</div>
+        <div id="fb-text"></div>
+      </div>
+      <div class="nav-row">
+        <button class="next-btn" id="next-btn">Next Item &rarr;</button>
+      </div>
+    </div>
+
+    <!-- END SCREEN -->
+    <div id="end-screen" class="end-screen hidden">
+      <div class="stamp green" id="end-stamp">Declassified</div>
+      <div class="score-big" id="score-big">0/20</div>
+      <div class="score-tag" id="score-tag">Assessment Complete</div>
+      <p id="end-msg">Summary of your performance below.</p>
+      <button class="restart-btn" id="restart-btn">Run Briefing Again</button>
+      <div class="review" id="review-list"></div>
+    </div>
+
   </div>
-  <div class="footer-note" id="footerNote" style="padding-bottom:16px;">50 questions, shuffled order &middot; hints available anytime &middot; no penalty for asking</div>
 </div>
 
 <script>
-const rawData = [
-  {q:"What is web development?", a:"The process of creating and maintaining websites.", cat:"Fundamentals", hint:"Websites don't just appear — someone builds and keeps them running."},
-  {q:"What are the four main aspects of web development?", a:"Design, structure, functionality, and maintenance.", cat:"Fundamentals", hint:"Think: how it looks, how it's built, what it does, and keeping it running."},
-  {q:"What does HTML provide?", a:"The structure of a webpage.", cat:"HTML", hint:"The skeleton beneath everything you see on a page."},
-  {q:"What does CSS control?", a:"The appearance of a webpage.", cat:"Design", hint:"Colors, fonts, spacing — the look, not the logic."},
-  {q:"What does JavaScript provide?", a:"Interactivity and behavior of a webpage.", cat:"Design", hint:"What makes a button actually do something when you click it."},
-  {q:"In the house analogy, what does HTML represent?", a:"The concrete structure of the house.", cat:"HTML", hint:"Walls and framing, not paint or wiring."},
-  {q:"In the house analogy, what does CSS represent?", a:"The paint and decoration.", cat:"Design", hint:"Think wallpaper and trim, not the structure itself."},
-  {q:"In the house analogy, what does JavaScript represent?", a:"The electricity and automatic doors.", cat:"Design", hint:"The wiring that makes things move and respond."},
-  {q:"What is the Internet?", a:"A global network connecting billions of computers.", cat:"Internet", hint:"The physical/technical network itself, not the content riding on it."},
-  {q:"What is the World Wide Web (WWW)?", a:"A collection of webpages and websites accessed through the Internet.", cat:"Internet", hint:"What you actually browse — pages linked together."},
-  {q:"Can the Web exist without the Internet?", a:"No.", cat:"Internet", hint:"One is the network, the other rides on top of it."},
-  {q:"What application is used to access websites?", a:"A web browser.", cat:"Internet", hint:"Chrome, Firefox, Safari — that kind of tool."},
-  {q:"What happens first when accessing a website?", a:"The user enters a website address (URL).", cat:"Internet", hint:"You have to type or click something before anything loads."},
-  {q:"Who sends the request to the server?", a:"The browser.", cat:"Internet", hint:"It's the same tool you use to browse — it asks, the other side answers."},
-  {q:"What does the server do?", a:"Processes the request and returns the webpage.", cat:"Internet", hint:"It receives the request, does the work, and sends something back."},
-  {q:"What is a client?", a:"The user's device that requests information.", cat:"Internet", hint:"It's the one asking for something — usually your own device."},
-  {q:"What is a server?", a:"A computer that stores and delivers website files.", cat:"Internet", hint:"It's the one holding the files and handing them out on request."},
-  {q:"In the restaurant analogy, who is the client?", a:"The customer.", cat:"Internet", hint:"Whoever places the order, not whoever cooks it."},
-  {q:"In the restaurant analogy, who is the server?", a:"The kitchen.", cat:"Internet", hint:"Where the food actually gets made and sent out."},
-  {q:"What is Front-End development?", a:"The visible part of a website users interact with.", cat:"Fundamentals", hint:"Everything you can see and click on directly."},
-  {q:"Name the three Front-End technologies.", a:"HTML, CSS, JavaScript.", cat:"Fundamentals", hint:"Structure, style, and behavior — the trio you've seen all quiz long."},
-  {q:"What is Back-End development?", a:"The server-side processes behind a website.", cat:"Fundamentals", hint:"The part running behind the scenes, out of view."},
-  {q:"Name one Back-End programming language.", a:"Python, PHP, Java, or Node.js.", cat:"Fundamentals", hint:"Not HTML/CSS/JS-in-browser — think server-side languages."},
-  {q:"Information Warfare is not only about what?", a:"Cyber attacks.", cat:"Credibility", hint:"Hacking is only one piece of a much bigger picture."},
-  {q:"Name one use of websites in Information Warfare.", a:"Public information, official announcements, strategic communication, crisis communication, public awareness, or countering misinformation.", cat:"Credibility", hint:"Websites can inform and correct the record, not just attack."},
-  {q:"Which domain is commonly used by government websites?", a:".gov", cat:"Credibility", hint:"Government agencies use this ending."},
-  {q:"Which domain is commonly used by military websites?", a:".mil", cat:"Credibility", hint:"Armed forces websites use this ending."},
-  {q:"Which domain is commonly used by educational institutions?", a:".edu", cat:"Credibility", hint:"Schools and universities use this ending."},
-  {q:"Which domain is commonly used by commercial businesses?", a:".com", cat:"Credibility", hint:"The most common ending — for-profit businesses."},
-  {q:"Which domain is commonly used by organizations?", a:".org", cat:"Credibility", hint:"Nonprofits and organizations typically use this ending."},
-  {q:"Does a domain alone guarantee a website is trustworthy?", a:"No.", cat:"Credibility", hint:"Anyone can register almost any domain type, regardless of intent."},
-  {q:"Give one characteristic of an official website.", a:"HTTPS, verified organization, contact information, updated content, or references.", cat:"Credibility", hint:"Look for a secure connection and a real organization behind it."},
-  {q:"Give one characteristic of an unofficial website.", a:"Unknown owner, anonymous author, clickbait, no references, or outdated information.", cat:"Credibility", hint:"Missing sources, unclear ownership, sensational headlines."},
-  {q:"What does HTML stand for?", a:"HyperText Markup Language.", cat:"HTML", hint:"Spell it out: HyperText ______ ______."},
-  {q:"Without HTML, what cannot exist?", a:"A webpage.", cat:"HTML", hint:"Nothing to structure means nothing to display."},
-  {q:"Which HTML tag contains everything visible on the webpage?", a:"<body>", cat:"HTML", hint:"Everything the visitor actually sees lives inside this tag."},
-  {q:"Which HTML tag sets the browser tab title?", a:"<title>", cat:"HTML", hint:"Look at the browser tab, not the page content itself."},
-  {q:"Which HTML tag is used for the main heading?", a:"<h1>", cat:"HTML", hint:"The biggest, most important heading on the page."},
-  {q:"Which HTML tag is used for paragraphs?", a:"<p>", cat:"HTML", hint:"Where a block of regular text lives."},
-  {q:"What HTML element is used to collect user input?", a:"Form", cat:"HTML", hint:"Text boxes, checkboxes, submit buttons — all bundled together."},
-  {q:"What is the purpose of CSS?", a:"To style and format webpages.", cat:"Design", hint:"Same idea as earlier — appearance, not structure or logic."},
-  {q:"What is Responsive Design?", a:"A design that adjusts automatically to different screen sizes.", cat:"Design", hint:"A layout that reshapes itself depending on your screen."},
-  {q:"Why is Responsive Design important?", a:"Most users access websites using smartphones.", cat:"Design", hint:"Think about what device most people are holding right now."},
-  {q:"What does JavaScript add to websites?", a:"Interactivity such as buttons, menus, forms, and animations.", cat:"Design", hint:"Same theme as before — things that react when you interact with them."},
-  {q:"What are the five typical website layout components?", a:"Header, Navigation, Main Content, Sidebar, Footer.", cat:"Fundamentals", hint:"Top bar, menu, main area, side panel, bottom bar — five zones."},
-  {q:"Name one item in the Website Credibility Checklist.", a:"HTTPS, domain, publication date, references, contact information, organization, grammar, images, or sources.", cat:"Credibility", hint:"Same theme as the official-website question — signs a site can be trusted."},
-  {q:"Should you always verify information before sharing it?", a:"Yes.", cat:"Credibility", hint:"Think about the responsible thing to do before hitting 'share'."},
-  {q:"Name one ethical practice when using online information.", a:"Verify information, respect copyright, protect privacy, use official sources, or cite references.", cat:"Credibility", hint:"Doing right by sources and original creators."},
-  {q:"Name one unethical practice to avoid.", a:"Spreading misinformation, modifying official announcements, sharing unverified content, or plagiarism.", cat:"Credibility", hint:"The opposite of ethical practice — things that spread falsehood or steal credit."},
-  {q:"What is the final step in the Information Verification Process?", a:"Verify the information before sharing it.", cat:"Credibility", hint:"The very last thing you should do before sharing information."}
+const QUESTIONS = [
+  {
+    topic: "OSINT",
+    q: "What does OSINT stand for?",
+    options: ["Open-Source Intelligence","Operational Signals Intelligence","Online Source Information Network","Open Standard Intelligence Network"],
+    correct: 0,
+    note: "OSINT refers to intelligence gathered from publicly available sources — social media, news, forums, and more."
+  },
+  {
+    topic: "NLP",
+    q: "What does NLP stand for?",
+    options: ["Network Learning Protocol","Natural Language Processing","National Language Program","Neural Linguistic Pattern"],
+    correct: 1,
+    note: "NLP is the AI field focused on enabling machines to understand and interpret human language."
+  },
+  {
+    topic: "SENTIMENT ANALYSIS",
+    q: "What AI technique identifies positive, neutral, or negative opinions in text?",
+    options: ["Named Entity Recognition","Topic Modeling","Sentiment Analysis","Text Summarization"],
+    correct: 2,
+    note: "Sentiment analysis classifies the emotional tone or opinion expressed in a piece of text."
+  },
+  {
+    topic: "SENTIMENT ANALYSIS",
+    q: "How many sentiment categories are typically used?",
+    options: ["Two","Three (Positive, Neutral, Negative)","Four","Five"],
+    correct: 1,
+    note: "The standard model uses three categories: Positive, Neutral, and Negative."
+  },
+  {
+    topic: "INFORMATION ENVIRONMENT",
+    q: "Which dimension of the Information Environment does sentiment analysis primarily support?",
+    options: ["Physical","Technical","Cognitive","Informational"],
+    correct: 2,
+    note: "Sentiment analysis informs the cognitive dimension — how audiences think, feel, and decide."
+  },
+  {
+    topic: "OSINT",
+    q: "Which of the following is a social media platform commonly used for OSINT?",
+    options: ["Bloomberg Terminal","Facebook","SAP","LinkedIn Sales Navigator"],
+    correct: 1,
+    note: "Facebook, X, YouTube, TikTok, and Reddit are all commonly monitored platforms for OSINT collection."
+  },
+  {
+    topic: "WORKFLOW",
+    q: "What is the first step in the sentiment analysis workflow?",
+    options: ["Train the AI model","Clean the data","Collect online/open-source data","Publish the report"],
+    correct: 2,
+    note: "The workflow begins with collecting online or open-source data before any processing occurs."
+  },
+  {
+    topic: "WORKFLOW",
+    q: "What is done before AI analyzes the text?",
+    options: ["Data cleaning and preparation","Sentiment scoring","Narrative tracking","Model deployment"],
+    correct: 0,
+    note: "Raw text must be cleaned and prepared — removing noise, normalizing format — before analysis."
+  },
+  {
+    topic: "NLP",
+    q: "Which AI field is used to understand human language?",
+    options: ["Computer Vision","Robotics","Natural Language Processing (NLP)","Cryptography"],
+    correct: 2,
+    note: "NLP is the discipline dedicated to processing and understanding human language."
+  },
+  {
+    topic: "NER",
+    q: "What does NER stand for?",
+    options: ["Network Encryption Routine","Named Entity Recognition","National Event Registry","Natural Emotion Reading"],
+    correct: 1,
+    note: "NER identifies and classifies named entities — people, organizations, locations — within text."
+  },
+  {
+    topic: "SENTIMENT TYPES",
+    q: "What type of sentiment expresses support or confidence?",
+    options: ["Negative","Neutral","Positive","Mixed"],
+    correct: 2,
+    note: "Positive sentiment reflects support, approval, or confidence in the subject."
+  },
+  {
+    topic: "SENTIMENT TYPES",
+    q: "What type of sentiment is factual and without emotion?",
+    options: ["Positive","Neutral","Negative","Sarcastic"],
+    correct: 1,
+    note: "Neutral sentiment is factual or objective, carrying no strong emotional charge."
+  },
+  {
+    topic: "SENTIMENT TYPES",
+    q: "What type of sentiment expresses criticism or dissatisfaction?",
+    options: ["Positive","Mixed","Neutral","Negative"],
+    correct: 3,
+    note: "Negative sentiment reflects criticism, dissatisfaction, or opposition."
+  },
+  {
+    topic: "VALIDATION",
+    q: "Why is human validation important in this process?",
+    options: ["To replace AI entirely","To slow down analysis","To verify AI-generated results and provide context","To generate more raw data"],
+    correct: 2,
+    note: "Analysts verify AI output and add contextual judgment the model may lack."
+  },
+  {
+    topic: "LIMITATIONS",
+    q: "Which of the following is a genuine limitation of AI sentiment analysis?",
+    options: ["It works only in English","Difficulty with sarcasm, humor, and cultural context","It requires no human oversight","It cannot process any text at all"],
+    correct: 1,
+    note: "Sarcasm, humor, slang, cultural nuance, mixed emotions, and bot-generated content all challenge AI sentiment models."
+  },
+  {
+    topic: "NARRATIVES",
+    q: "Besides sentiment, what else should analysts monitor?",
+    options: ["Stock prices","Hardware specifications","Narratives","Weather patterns"],
+    correct: 2,
+    note: "Tracking narratives — not just sentiment scores — reveals how messaging shapes perception over time."
+  },
+  {
+    topic: "NARRATIVES",
+    q: "What is a recurring message that shapes public perception called?",
+    options: ["A headline","A meme","A broadcast","A narrative"],
+    correct: 3,
+    note: "A narrative is a recurring, reinforced message designed to shape how an audience perceives events."
+  },
+  {
+    topic: "THREATS",
+    q: "Which of the following is an example of an information threat?",
+    options: ["Disinformation","Data compression","Signal jamming","Firewall breach"],
+    correct: 0,
+    note: "Disinformation, misinformation, deepfakes, hate speech, and foreign influence operations are all information threats."
+  },
+  {
+    topic: "AI TOOLS",
+    q: "Which of these is an AI tool mentioned in this context?",
+    options: ["Adobe Photoshop","Anthropic Claude","Microsoft Excel","AutoCAD"],
+    correct: 1,
+    note: "OpenAI GPT, Google Gemini, Anthropic Claude, and Microsoft Azure AI are examples of relevant AI tools."
+  },
+  {
+    topic: "PURPOSE",
+    q: "What is the final purpose of sentiment analysis in Information Warfare?",
+    options: ["Increase social media engagement","Generate advertising revenue","Support military decision-making","Replace human analysts entirely"],
+    correct: 2,
+    note: "Ultimately, sentiment analysis exists to support military decision-making — providing decision advantage in the cognitive domain."
+  }
 ];
 
-let quizSet = [], idx = 0, score = 0, hintsUsed = 0, answered = false;
+let current = 0;
+let score = 0;
+let answers = []; // {chosen, correct, right}
 
-function setUrl(text){ document.getElementById('urlLive').textContent = text; }
-function setProgress(pct){ document.getElementById('progressFill').style.width = pct + '%'; }
+const startScreen = document.getElementById('start-screen');
+const quizScreen = document.getElementById('quiz-screen');
+const endScreen = document.getElementById('end-screen');
+const startBtn = document.getElementById('start-btn');
+const nextBtn = document.getElementById('next-btn');
+const restartBtn = document.getElementById('restart-btn');
 
-function startQuiz(){
-  quizSet = [...rawData].sort(()=>0.5-Math.random());
-  idx = 0; score = 0; hintsUsed = 0;
-  document.getElementById('footerNote').textContent = 'Deployment in progress — answer, or open the console for a hint.';
+startBtn.addEventListener('click', () => {
+  startScreen.classList.add('hidden');
+  quizScreen.classList.remove('hidden');
   renderQuestion();
-}
+});
+
+restartBtn.addEventListener('click', () => {
+  current = 0; score = 0; answers = [];
+  endScreen.classList.add('hidden');
+  quizScreen.classList.remove('hidden');
+  renderQuestion();
+});
+
+nextBtn.addEventListener('click', () => {
+  current++;
+  if(current >= QUESTIONS.length){
+    showEnd();
+  } else {
+    renderQuestion();
+  }
+});
 
 function renderQuestion(){
-  answered = false;
-  const item = quizSet[idx];
-  setUrl('web-fundamentals/q' + (idx+1));
-  setProgress((idx/quizSet.length)*100);
+  const item = QUESTIONS[current];
+  document.getElementById('q-current').textContent = current + 1;
+  document.getElementById('progress-fill').style.width = ((current) / QUESTIONS.length * 100) + '%';
+  document.getElementById('q-topic').textContent = 'ITEM ' + String(current+1).padStart(2,'0') + ' \u00b7 ' + item.topic;
+  document.getElementById('q-text').textContent = item.q;
 
-  let distractors = rawData.filter(d=>d.a!==item.a).sort(()=>0.5-Math.random()).slice(0,3).map(d=>d.a);
-  let options = [item.a, ...distractors].sort(()=>0.5-Math.random());
-
-  const content = document.getElementById('content');
-  content.innerHTML = `
-    <div class="q-meta">
-      <span class="q-count">Q${idx+1} / ${quizSet.length}</span>
-      <span class="q-tag ${item.cat}">${item.cat}</span>
-    </div>
-    <div class="q-text">${item.q}</div>
-    <div class="options" id="options"></div>
-    <div class="hint-zone">
-      <button class="hint-btn" id="hintBtn" onclick="revealHint()">&gt; open console for hint</button>
-      <div class="console" id="consoleBox">
-        <span class="prompt">&gt;</span><span class="line" id="hintText">${item.hint}</span>
-      </div>
-    </div>
-  `;
-
-  const optWrap = document.getElementById('options');
-  options.forEach(opt=>{
+  const optWrap = document.getElementById('q-options');
+  optWrap.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  item.options.forEach((opt, idx) => {
     const btn = document.createElement('button');
     btn.className = 'opt';
-    btn.innerHTML = `<span class="chev">&gt;</span><span>${opt}</span>`;
-    btn.onclick = ()=>selectAnswer(btn, opt, item.a);
+    btn.innerHTML = '<span class="letter">' + letters[idx] + '</span><span>' + opt + '</span>';
+    btn.addEventListener('click', () => selectAnswer(idx));
     optWrap.appendChild(btn);
   });
+
+  document.getElementById('q-feedback').className = 'feedback';
+  nextBtn.classList.remove('show');
+  nextBtn.textContent = (current === QUESTIONS.length - 1) ? 'See Results \u2192' : 'Next Item \u2192';
 }
 
-function revealHint(){
-  document.getElementById('consoleBox').classList.add('open');
-  document.getElementById('hintBtn').disabled = true;
-  hintsUsed++;
-}
+function selectAnswer(idx){
+  const item = QUESTIONS[current];
+  const opts = document.querySelectorAll('#q-options .opt');
+  const isRight = idx === item.correct;
 
-function selectAnswer(btn, selected, correct){
-  if(answered) return;
-  answered = true;
-  document.getElementById('hintBtn').disabled = true;
-
-  const allOpts = document.querySelectorAll('.opt');
-  allOpts.forEach(o=>{
-    o.disabled = true;
-    const label = o.querySelector('span:last-child').textContent;
-    if(label === correct) o.classList.add('correct');
-    else if(o === btn) o.classList.add('wrong');
-    else o.classList.add('dim');
+  opts.forEach((btn, i) => {
+    btn.classList.add('locked');
+    if(i === item.correct) btn.classList.add('correct');
+    if(i === idx && !isRight) btn.classList.add('wrong');
+    if(i !== idx && i !== item.correct) btn.classList.add('dim');
   });
 
-  if(selected === correct) score++;
+  const fb = document.getElementById('q-feedback');
+  fb.classList.add('show');
+  fb.classList.toggle('right', isRight);
+  fb.classList.toggle('wrong', !isRight);
+  document.getElementById('fb-verdict').textContent = isRight ? 'Confirmed' : 'Incorrect';
+  document.getElementById('fb-text').textContent = item.note;
 
-  setTimeout(()=>{
-    idx++;
-    if(idx < quizSet.length) renderQuestion();
-    else showResults();
-  }, 900);
+  if(isRight) score++;
+  answers.push({q: item.q, chosen: item.options[idx], correctAns: item.options[item.correct], right: isRight});
+
+  nextBtn.classList.add('show');
 }
 
-function showResults(){
-  setProgress(100);
-  setUrl('web-fundamentals/results');
-  const pct = Math.round((score/quizSet.length)*100);
-  let color = pct>=80 ? 'var(--green)' : pct>=50 ? 'var(--orange)' : 'var(--red)';
-  let msg = pct>=80 ? "Strong grasp of the fundamentals — internet, HTML, and credibility all clicked."
-    : pct>=50 ? "Solid baseline. Revisit a few weak spots before the real thing."
-    : "Worth another pass through the source material before retrying.";
+function showEnd(){
+  quizScreen.classList.add('hidden');
+  endScreen.classList.remove('hidden');
 
-  document.getElementById('footerNote').textContent = 'Assessment complete.';
-  document.getElementById('content').innerHTML = `
-    <div class="result">
-      <div class="pct" style="color:${color};">${pct}%</div>
-      <h3>Assessment complete</h3>
-      <p>${msg}</p>
-      <div class="stats">
-        <div><b>${score}/${quizSet.length}</b>correct</div>
-        <div><b>${hintsUsed}</b>hints used</div>
-      </div>
-      <button class="primary" onclick="startQuiz()">$ retry --quiz</button>
-    </div>
-  `;
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('score-big').textContent = score + '/20';
+
+  let tag, msg, stampText, stampGreen;
+  if(score >= 18){ tag='Exceptional — Full Grasp'; msg='You have a strong command of AI-assisted sentiment analysis and its role in information warfare.'; stampGreen=true; }
+  else if(score >= 14){ tag='Passed — Solid Understanding'; msg='You cleared the passing threshold. A review of the missed items below will round out the picture.'; stampGreen=true; }
+  else if(score >= 10){ tag='Below Threshold — Review Recommended'; msg='You are close, but several core concepts need reinforcement before this briefing is considered complete.'; stampGreen=false; }
+  else { tag='Requires Re-Briefing'; msg='Significant gaps detected. Recommend revisiting the material before reattempting.'; stampGreen=false; }
+
+  document.getElementById('score-tag').textContent = tag;
+  document.getElementById('end-msg').textContent = msg;
+  const stamp = document.getElementById('end-stamp');
+  stamp.textContent = stampGreen ? 'Declassified' : 'Review Required';
+  stamp.classList.toggle('green', stampGreen);
+
+  const reviewWrap = document.getElementById('review-list');
+  reviewWrap.innerHTML = '';
+  answers.forEach((a, i) => {
+    const row = document.createElement('div');
+    row.className = 'review-item ' + (a.right ? 'ok' : 'bad');
+    row.innerHTML = '<span class="mark">' + (a.right ? '\u2713' : '\u2717') + '</span>' +
+      '<span class="rtxt"><b>' + (i+1) + '. ' + a.q + '</b><br>Your answer: ' + a.chosen +
+      (a.right ? '' : ' &mdash; Correct: ' + a.correctAns) + '</span>';
+    reviewWrap.appendChild(row);
+  });
 }
 </script>
 </body>
